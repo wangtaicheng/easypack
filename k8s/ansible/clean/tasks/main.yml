@@ -1,0 +1,91 @@
+---
+# tasks file for clean
+
+## stop etcd service
+- name: stop etcd service
+  shell: "systemctl stop etcd"
+  ignore_errors: true
+
+## stop kubernetes master service
+- name: stop master service
+  shell: "systemctl stop kube-scheduler \
+          && systemctl stop kube-controller-manager \
+          && systemctl stop kube-apiserver"
+  ignore_errors: true
+
+## stop kubernetes node service
+- name: stop node service
+  shell: "systemctl stop kube-proxy    \
+          && systemctl stop  kubelet   \
+          && systemctl stop  docker    \
+          && systemctl stop  flannel "
+  ignore_errors: true
+
+## clean files
+- name: clean files kubectl & cfssltools
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ var_default_install_bin }}/kubectl"
+    - "{{ var_default_install_bin }}/kube-apiserver"
+    - "{{ var_default_install_bin }}/kube-controller-manager"
+    - "{{ var_default_install_bin }}/kube-scheduler"
+    - "{{ var_default_install_bin }}/kube-proxy"
+    - "{{ var_default_install_bin }}/kubelet"
+    - "{{ var_default_install_bin }}/flanneld"
+    - "{{ var_default_install_bin }}/cfssl"
+    - "{{ var_default_install_bin }}/cfssljson"
+    - "{{ var_default_install_bin }}/cfssl-certinfo"
+  tags:
+    - "clean"
+
+- name: clean files kubernetes sysctl file
+  file:
+    path: "{{ var_dest_k8s_sysctl }}"
+    state: absent
+
+- name: delete dirs for certifications
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+      - "{{ var_ssl_ca_dir }}/{{ var_ssl_file_ca_config }}"
+      - "{{ var_ssl_ca_dir }}/{{ var_ssl_file_ca_csr }}"
+      - "{{ var_ssl_etcd_dir }}/{{ var_ssl_file_etcd_csr }}"
+      - "{{ var_ssl_k8s_dir }}/{{ var_ssl_file_k8s_csr }}"
+      - "{{ var_ssl_k8s_dir }}/{{ var_ssl_file_k8sch_csr }}"
+      - "{{ var_ssl_k8s_dir }}/{{ var_ssl_file_k8scm_csr }}"
+      - "{{ var_ssl_k8s_dir }}/{{ var_ssl_file_admin_csr }}"
+      - "{{ var_kubeconfig_default }}"
+      - "{{ var_ssl_ca_dir }}"
+      - "{{ var_ssl_k8s_dir }}"
+      - "{{ var_ssl_etcd_dir }}"
+
+- name: delete dirs of etcd
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ var_etcd_conf }}"
+    - "{{ var_etcd_service }}"
+    - "{{ var_default_install_bin }}/etcd"
+    - "{{ var_default_install_bin }}/etcdctl"
+    - "{{ var_etcd_conf_dir }}"
+    - "{{ var_etcd_data_dir }}"
+
+- name: delete dirs of kubernetes master
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ var_kube_api_service }}"
+    - "{{ var_kube_sch_service }}"
+    - "{{ var_kube_scm_service }}"
+    - "{{ var_flannel_service }}"
+    - "{{ var_kubelet_service }}"
+    - "{{ var_kubeproxy_service }}"
+    - "{{ var_docker_service }}"
+    - "{{ var_kube_opt_log_dir }}"
+    - "{{ var_kube_dir_etc }}"
+    - "{{ var_docker_flannel_conf }}"

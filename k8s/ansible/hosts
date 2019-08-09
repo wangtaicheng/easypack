@@ -1,0 +1,18 @@
+# kubernetes : all-node
+[all-in-one]
+localhost
+
+[all]
+localhost
+
+# kubernetes : master
+[master]
+localhost
+
+# kubernetes : node
+[node]
+localhost
+
+# kubernetes : etcd
+[etcd]
+localhost
